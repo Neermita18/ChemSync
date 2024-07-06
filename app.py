@@ -18,7 +18,7 @@ from torch.utils.data import Dataset, DataLoader
 from sklearn.metrics.pairwise import cosine_similarity
 import requests
 from io import StringIO
-
+import tensorflow as tf     
 
 
 st.set_page_config(page_title="FDA-Approved Drugs Analysis", layout="centered")
@@ -115,23 +115,30 @@ if selected_name:
     encoded = tokenizer(selected_smiles, return_tensors="pt")
 
     output = model(**encoded)
-    print(output[0])
+    
+    pipeline = pipeline('feature-extraction', model=model, tokenizer=tokenizer) ##easier way to find embeddings of smile strings
+    data = pipeline(selected_smiles)
+    print(selected_smiles)
+    st.write(data)
+    all_smiles = df4["SMILES"].tolist()
+     
+    embeddings = []
+    for smiles in all_smiles:
+        data = pipeline(smiles)
+        embeddings.append(np.mean(data[0], axis=0))  # Using mean pooling
+    ex=np.array(embeddings)
+    print(ex)
+    s=[]
+    selected_embedding = pipeline(selected_smiles)
+    s.append(np.mean(data[0], axis=0))
+    s=np.array(s)
+    
+    
+    # Compute cosine similarity
+    similarities = cosine_similarity([s], ex).flatten()
+    print(similarities)
     
 
-  
-    
-    
-    
-    
-    
-    
-    
-    
-    # pipeline = pipeline('feature-extraction', model=model, tokenizer=tokenizer)
-    # data = pipeline(selected_smiles)
-    # st.write(data)
-    # print(selected_smiles)
-    # print(data)
     
 
 
