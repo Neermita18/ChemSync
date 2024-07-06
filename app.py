@@ -12,13 +12,18 @@ from rdkit.Chem import *
 import rdkit
 from rdkit.Chem import AllChem, Draw
 import py3Dmol
+import torch
+from transformers import AutoTokenizer, AutoModelForMaskedLM, AdamW
+from torch.utils.data import Dataset, DataLoader
+from sklearn.metrics.pairwise import cosine_similarity
+import requests
+from io import StringIO
+
+
 st.set_page_config(page_title="Molecular Grid", layout="centered")
 st.title("Lipinski's Rule of 5")
 st.markdown("This rule helps to predict if a biologically active molecule is likely to have the chemical and physical properties to be orally bioavailable. The Lipinski rule bases pharmacokinetic drug properties such as absorption, distribution, metabolism and excretion on specific physicochemical properties.")
 
-
-import requests
-from io import StringIO
 
 url = 'https://www.cureffi.org/wp-content/uploads/2013/10/drugs.txt?raw=true'
 response = requests.get(url, verify=False)
@@ -92,7 +97,6 @@ rhtml= mols2grid.display(df4, subset=["img","generic_name", "MW"], mapping={"gen
 components.html(rhtml, width=900, height=750, scrolling=False)
 
 selected_name = st.selectbox("Select a molecule to view its 3D structure:", df4["generic_name"].unique())
-
 if selected_name:
     selected_smiles = df4[df4["generic_name"] == selected_name]["SMILES"].values[0]
     mol = generate_3d_coordinates(selected_smiles)
@@ -102,16 +106,24 @@ if selected_name:
     viewer.addModel(pdb_block, "pdb")
     viewer.setStyle({'stick': {}})
     viewer.zoomTo()
-    
     viewer_html = viewer._make_html()
-    
-    # Embed the HTML content
     components.html(viewer_html, height=450)
-   
+    
+    tokenizer = AutoTokenizer.from_pretrained("seyonec/SmilesTokenizer_ChemBERTa_zinc250k_40k")
+    model = AutoModelForMaskedLM.from_pretrained("seyonec/SmilesTokenizer_ChemBERTa_zinc250k_40k")
+    inputs = tokenizer(selected_smiles, return_tensors='pt', padding=True, truncation=True)
+    with torch.no_grad():
+        outputs = model(**inputs)
 
-from transformers import AutoTokenizer, AutoModelForMaskedLM
+    embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().numpy()
+    st.write(embeddings)
 
-tokenizer = AutoTokenizer.from_pretrained("DeepChem/ChemBERTa-10M-MLM")
-model = AutoModelForMaskedLM.from_pretrained("DeepChem/ChemBERTa-10M-MLM")
-s= tokenizer.tokenize(df4["SMILES"][0])
-print(s)
+
+
+# tokenizer = AutoTokenizer.from_pretrained("DeepChem/ChemBERTa-10M-MLM")
+# model = AutoModelForMaskedLM.from_pretrained("DeepChem/ChemBERTa-10M-MLM")
+# s= tokenizer(df4["SMILES"][0], return_tensors='pt')
+# with torch.no_grad():
+#     outputs= model(**s)
+# print(outputs)
+# print(s)
