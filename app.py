@@ -11,7 +11,7 @@ import mols2grid
 from rdkit.Chem import *
 import rdkit
 from rdkit.Chem import AllChem, Draw
-import py3Dmol
+# import py3Dmol
 st.set_page_config(page_title="Molecular Grid", layout="centered")
 st.title("Lipinski's Rule of 5")
 st.markdown("This rule helps to predict if a biologically active molecule is likely to have the chemical and physical properties to be orally bioavailable. The Lipinski rule bases pharmacokinetic drug properties such as absorption, distribution, metabolism and excretion on specific physicochemical properties.")
