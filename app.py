@@ -109,7 +109,7 @@ if selected_name:
     components.html(viewer_html, height=450)
    
 
-# from transformers import AutoTokenizer, AutoModelForMaskedLM
+from transformers import AutoTokenizer, AutoModelForMaskedLM
 
-# tokenizer = AutoTokenizer.from_pretrained("DeepChem/ChemBERTa-10M-MLM")
-# model = AutoModelForMaskedLM.from_pretrained("DeepChem/ChemBERTa-10M-MLM")
+tokenizer = AutoTokenizer.from_pretrained("DeepChem/ChemBERTa-10M-MLM")
+model = AutoModelForMaskedLM.from_pretrained("DeepChem/ChemBERTa-10M-MLM")
