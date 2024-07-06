@@ -74,7 +74,7 @@ df3=df2[df2["NumHDonors"]<NumHDonors_cutoff]
 df4=df3[df3["NumHAcceptors"]<NumHAccep_cutoff]
 
 print(df4.columns)
-st.write(df4, width=900)
+st.write(df4)
 st.markdown(
     """
     <style>
@@ -113,3 +113,5 @@ from transformers import AutoTokenizer, AutoModelForMaskedLM
 
 tokenizer = AutoTokenizer.from_pretrained("DeepChem/ChemBERTa-10M-MLM")
 model = AutoModelForMaskedLM.from_pretrained("DeepChem/ChemBERTa-10M-MLM")
+s= tokenizer.tokenize(df4["SMILES"][0])
+print(s)
