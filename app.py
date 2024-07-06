@@ -13,14 +13,15 @@ import rdkit
 from rdkit.Chem import AllChem, Draw
 import py3Dmol
 import torch
-from transformers import AutoTokenizer, AutoModelForMaskedLM, AdamW
+from transformers import AutoTokenizer, AutoModelForMaskedLM, AdamW, pipeline
 from torch.utils.data import Dataset, DataLoader
 from sklearn.metrics.pairwise import cosine_similarity
 import requests
 from io import StringIO
 
 
-st.set_page_config(page_title="Molecular Grid", layout="centered")
+
+st.set_page_config(page_title="FDA-Approved Drugs Analysis", layout="centered")
 st.title("Lipinski's Rule of 5")
 st.markdown("This rule helps to predict if a biologically active molecule is likely to have the chemical and physical properties to be orally bioavailable. The Lipinski rule bases pharmacokinetic drug properties such as absorption, distribution, metabolism and excretion on specific physicochemical properties.")
 
@@ -109,14 +110,29 @@ if selected_name:
     viewer_html = viewer._make_html()
     components.html(viewer_html, height=450)
     
-    tokenizer = AutoTokenizer.from_pretrained("seyonec/SmilesTokenizer_ChemBERTa_zinc250k_40k")
-    model = AutoModelForMaskedLM.from_pretrained("seyonec/SmilesTokenizer_ChemBERTa_zinc250k_40k")
-    inputs = tokenizer(selected_smiles, return_tensors='pt', padding=True, truncation=True)
-    with torch.no_grad():
-        outputs = model(**inputs)
+    tokenizer = AutoTokenizer.from_pretrained("seyonec/ChemBERTa-zinc-base-v1")
+    model = AutoModelForMaskedLM.from_pretrained("seyonec/ChemBERTa-zinc-base-v1")
+    encoded = tokenizer(selected_smiles, return_tensors="pt")
 
-    embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().numpy()
-    st.write(embeddings)
+    output = model(**encoded)
+    print(output[0])
+    
+
+  
+    
+    
+    
+    
+    
+    
+    
+    
+    # pipeline = pipeline('feature-extraction', model=model, tokenizer=tokenizer)
+    # data = pipeline(selected_smiles)
+    # st.write(data)
+    # print(selected_smiles)
+    # print(data)
+    
 
 
 
