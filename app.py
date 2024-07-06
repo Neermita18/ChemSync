@@ -40,8 +40,10 @@ def NumHDonor(smiles):
 def NumHAccep(smiles):
     mol=Chem.MolFromSmiles(smiles)
     return NumHAcceptors(mol)
+
 def generate_3d_coordinates(smiles):
     mol = Chem.MolFromSmiles(smiles)
+    # print(mol) rdkit.Chem.rdchem.Mol object
     mol = Chem.AddHs(mol)
     AllChem.EmbedMolecule(mol, AllChem.ETKDG())
     AllChem.UFFOptimizeMolecule(mol)
@@ -85,13 +87,29 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-rhtml= mols2grid.display(df4, subset=["img","generic_name", "MW"], mapping={"smiles": "SMILES", "generic_name": "Name"}, )._repr_html_()
+rhtml= mols2grid.display(df4, subset=["img","generic_name", "MW"], mapping={"generic_name": "Name"}, )._repr_html_()
 
-components.html(rhtml, width=900, height=1100, scrolling=False)
+components.html(rhtml, width=900, height=750, scrolling=False)
 
+selected_name = st.selectbox("Select a molecule to view its 3D structure:", df4["generic_name"].unique())
 
-# Load model directly
-from transformers import AutoTokenizer, AutoModelForMaskedLM
+if selected_name:
+    selected_smiles = df4[df4["generic_name"] == selected_name]["SMILES"].values[0]
+    mol = generate_3d_coordinates(selected_smiles)
+    pdb_block = mol_to_pdb_block(mol)
+    
+    viewer = py3Dmol.view(width=400, height=400)
+    viewer.addModel(pdb_block, "pdb")
+    viewer.setStyle({'stick': {}})
+    viewer.zoomTo()
+    
+    viewer_html = viewer._make_html()
+    
+    # Embed the HTML content
+    components.html(viewer_html, height=450)
+   
 
-tokenizer = AutoTokenizer.from_pretrained("DeepChem/ChemBERTa-10M-MLM")
-model = AutoModelForMaskedLM.from_pretrained("DeepChem/ChemBERTa-10M-MLM")
+# from transformers import AutoTokenizer, AutoModelForMaskedLM
+
+# tokenizer = AutoTokenizer.from_pretrained("DeepChem/ChemBERTa-10M-MLM")
+# model = AutoModelForMaskedLM.from_pretrained("DeepChem/ChemBERTa-10M-MLM")
