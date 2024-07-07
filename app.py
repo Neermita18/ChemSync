@@ -18,7 +18,8 @@ from torch.utils.data import Dataset, DataLoader
 from sklearn.metrics.pairwise import cosine_similarity
 import requests
 from io import StringIO
-import tensorflow as tf     
+import tensorflow as tf    
+import heapq 
 
 
 st.set_page_config(page_title="FDA-Approved Drugs Analysis", layout="centered")
@@ -102,7 +103,6 @@ if selected_name:
     selected_smiles = df4[df4["generic_name"] == selected_name]["SMILES"].values[0]
     mol = generate_3d_coordinates(selected_smiles)
     pdb_block = mol_to_pdb_block(mol)
-    
     viewer = py3Dmol.view(width=400, height=400)
     viewer.addModel(pdb_block, "pdb")
     viewer.setStyle({'stick': {}})
@@ -112,31 +112,51 @@ if selected_name:
     
     tokenizer = AutoTokenizer.from_pretrained("seyonec/ChemBERTa-zinc-base-v1")
     model = AutoModelForMaskedLM.from_pretrained("seyonec/ChemBERTa-zinc-base-v1")
-    encoded = tokenizer(selected_smiles, return_tensors="pt")
-
-    output = model(**encoded)
-    
+    # encoded = tokenizer(selected_smiles, return_tensors="pt")
+    # output = model(**encoded)
     pipeline = pipeline('feature-extraction', model=model, tokenizer=tokenizer) ##easier way to find embeddings of smile strings
-    data = pipeline(selected_smiles)
-    print(selected_smiles)
-    st.write(data)
+    # data = pipeline(selected_smiles)
+    # print(selected_smiles)
+    st.write("Extracting Embeddings...")
     all_smiles = df4["SMILES"].tolist()
-     
-    embeddings = []
-    for smiles in all_smiles:
-        data = pipeline(smiles)
-        embeddings.append(np.mean(data[0], axis=0))  # Using mean pooling
-    ex=np.array(embeddings)
-    print(ex)
-    s=[]
-    selected_embedding = pipeline(selected_smiles)
-    s.append(np.mean(data[0], axis=0))
-    s=np.array(s)
+    embeddings = [pipeline(smiles)[0] for smiles in all_smiles]
+    # print(embeddings)
+    embeddings = np.array([np.mean(embed, axis=0) for embed in embeddings])  # Using mean pooling
     
+    # Extract embedding for the selected SMILES
+    # print(pipeline(selected_smiles))
+
     
+    selected_embedding = pipeline(selected_smiles)[0]
+    # print("***********************************************************************")
+    # print(selected_embedding)
+    selected_embedding = np.mean(selected_embedding, axis=0).reshape(1, -1)
+    print(selected_embedding.shape)
+    print(embeddings.shape)
     # Compute cosine similarity
-    similarities = cosine_similarity([s], ex).flatten()
-    print(similarities)
+    similarities = cosine_similarity(selected_embedding, embeddings).flatten()
+    print(similarities.shape)
+    top_indices = similarities.argsort()[-6:][::-1]  
+    top_indices = top_indices[1:]  
+    st.write(selected_embedding)
+    st.write("Top 5 most similar molecules:")
+    for idx in top_indices:
+        st.write(f"Generic Name: {df4.iloc[idx]['generic_name']}, Similarity: {similarities[idx]}")
+        s=df4.iloc[idx]["SMILES"]
+        mol = generate_3d_coordinates(s)
+        pdb_block = mol_to_pdb_block(mol)
+        viewer = py3Dmol.view(width=200, height=200)
+        viewer.addModel(pdb_block, "pdb")
+        viewer.setStyle({'stick': {}})
+        viewer.zoomTo()
+        viewer_html = viewer._make_html()
+        components.html(viewer_html, height=200)
+        
+    
+    
+    
+    
+    
     
 
     
