@@ -19,12 +19,13 @@ from sklearn.metrics.pairwise import cosine_similarity
 import requests
 from io import StringIO
 import tensorflow as tf    
-import heapq 
+from rdkit.Chem import AllChem
+from rdkit import DataStructs
 
 
 st.set_page_config(page_title="FDA-Approved Drugs Analysis", layout="centered")
 st.title("Lipinski's Rule of 5")
-st.markdown("This rule helps to predict if a biologically active molecule is likely to have the chemical and physical properties to be orally bioavailable. The Lipinski rule bases pharmacokinetic drug properties such as absorption, distribution, metabolism and excretion on specific physicochemical properties.")
+st.markdown("The Lipinski rule of five is a guideline used to predict whether a biologically active molecule is likely to have the chemical and physical properties necessary for oral bioavailability. ")
 
 
 url = 'https://www.cureffi.org/wp-content/uploads/2013/10/drugs.txt?raw=true'
@@ -56,6 +57,19 @@ def generate_3d_coordinates(smiles):
     AllChem.UFFOptimizeMolecule(mol)
     return mol
 
+def generate_fingerprint(smiles):
+    mol = Chem.MolFromSmiles(smiles)
+    if mol is None:
+        raise ValueError(f"Invalid SMILES: {smiles}")
+    fp = AllChem.GetMorganFingerprintAsBitVect(mol, 2, nBits=1024)  # Morgan fingerprint with radius 2
+    return fp
+
+def calculate_tanimoto_coefficient(smiles1, smiles2):
+    fp1 = generate_fingerprint(smiles1)
+    fp2 = generate_fingerprint(smiles2)
+    return DataStructs.TanimotoSimilarity(fp1, fp2)
+
+
 def mol_to_pdb_block(mol):
     return Chem.MolToPDBBlock(mol)
 
@@ -69,7 +83,8 @@ df["NumHAcceptors"]=df.apply(lambda x: NumHAccep(x["smiles"]), axis=1)
 df=df.drop(["smiles"], axis=1)
     
 st.sidebar.header("Set your desired parameters!")
-st.sidebar.write("*some")
+st.sidebar.write("""This rule assesses pharmacokinetic properties such as absorption, distribution, metabolism, and excretion based on specific physicochemical criteria, which include:
+""")
 mweight_cutoff= st.sidebar.slider(label="Molecular Weight", min_value=0, max_value=1000, value=500, step=10,)
 logp_cutoff=st.sidebar.slider(label="LogP of molecule", min_value=-10, max_value=10, value=5, step=1,)
 NumHDonors_cutoff=st.sidebar.slider(label="No. of H Donors", min_value=0, max_value=15, value=5, step=1,)
@@ -152,8 +167,50 @@ if selected_name:
         viewer_html = viewer._make_html()
         components.html(viewer_html, height=200)
         
+        
+    st.write("Calculating Tanimoto coefficients...")
+    tanimoto_coeffs = []
+    for idx, smiles in enumerate(df4["SMILES"].tolist()):
+        if smiles != selected_smiles:
+            tanimoto_coeff = calculate_tanimoto_coefficient(selected_smiles, smiles)
+            tanimoto_coeffs.append((idx, tanimoto_coeff))
     
-    
+    # Sort by Tanimoto coefficient
+    tanimoto_coeffs.sort(key=lambda x: x[1], reverse=True)
+    top_tanimoto_indices = [idx for idx, _ in tanimoto_coeffs[:5]]
+
+    st.write("Top 5 most similar molecules based on Tanimoto Coefficient:")
+    for idx in top_tanimoto_indices:
+        st.write(f"Generic Name: {df4.iloc[idx]['generic_name']}, Tanimoto Coefficient: {tanimoto_coeffs[idx][1]}")
+        s=df4.iloc[idx]["SMILES"]
+        mol = generate_3d_coordinates(s)
+        pdb_block = mol_to_pdb_block(mol)
+        viewer = py3Dmol.view(width=200, height=200)
+        viewer.addModel(pdb_block, "pdb")
+        viewer.setStyle({'stick': {}})
+        viewer.zoomTo()
+        viewer_html = viewer._make_html()
+        components.html(viewer_html, height=200)
+ 
+# abacavir_smiles = df4[df4["generic_name"] == "Abacavir"]["SMILES"].iloc[0]
+# ruxolitinib_smiles = df4[df4["generic_name"] == "Ruxolitinib"]["SMILES"].iloc[0]
+
+# # Function to generate fingerprints
+# def generate_fingerprint(smiles):
+#     mol = Chem.MolFromSmiles(smiles)
+#     if mol is None:
+#         raise ValueError(f"Invalid SMILES: {smiles}")
+#     fp = AllChem.GetMorganFingerprintAsBitVect(mol, 2, nBits=1024)  # Morgan fingerprint with radius 2
+#     return fp
+
+# # Generate fingerprints
+# fp_abacavir = generate_fingerprint(abacavir_smiles)
+# fp_ruxolitinib = generate_fingerprint(ruxolitinib_smiles)
+
+# # Calculate Tanimoto coefficient
+# tanimoto_coefficient = DataStructs.TanimotoSimilarity(fp_abacavir, fp_ruxolitinib)
+
+# print(f"Tanimoto coefficient between Abacavir and Ruxolitinib: {tanimoto_coefficient:.4f}")
     
     
     
