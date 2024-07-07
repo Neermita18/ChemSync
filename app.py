@@ -114,6 +114,7 @@ rhtml= mols2grid.display(df4, subset=["img","generic_name", "MW"], mapping={"gen
 components.html(rhtml, width=900, height=750, scrolling=False)
 
 selected_name = st.selectbox("Select a molecule to view its 3D structure:", df4["generic_name"].unique())
+
 if selected_name:
     selected_smiles = df4[df4["generic_name"] == selected_name]["SMILES"].values[0]
     mol = generate_3d_coordinates(selected_smiles)
@@ -132,65 +133,68 @@ if selected_name:
     pipeline = pipeline('feature-extraction', model=model, tokenizer=tokenizer) ##easier way to find embeddings of smile strings
     # data = pipeline(selected_smiles)
     # print(selected_smiles)
-    st.write("Extracting Embeddings...")
-    all_smiles = df4["SMILES"].tolist()
-    embeddings = [pipeline(smiles)[0] for smiles in all_smiles]
-    # print(embeddings)
-    embeddings = np.array([np.mean(embed, axis=0) for embed in embeddings])  # Using mean pooling
     
-    # Extract embedding for the selected SMILES
-    # print(pipeline(selected_smiles))
-
-    
-    selected_embedding = pipeline(selected_smiles)[0]
-    # print("***********************************************************************")
-    # print(selected_embedding)
-    selected_embedding = np.mean(selected_embedding, axis=0).reshape(1, -1)
-    print(selected_embedding.shape)
-    print(embeddings.shape)
-    # Compute cosine similarity
-    similarities = cosine_similarity(selected_embedding, embeddings).flatten()
-    print(similarities.shape)
-    top_indices = similarities.argsort()[-6:][::-1]  
-    top_indices = top_indices[1:]  
-    st.write(selected_embedding)
-    st.write("Top 5 most similar molecules:")
-    for idx in top_indices:
-        st.write(f"Generic Name: {df4.iloc[idx]['generic_name']}, Similarity: {similarities[idx]}")
-        s=df4.iloc[idx]["SMILES"]
-        mol = generate_3d_coordinates(s)
-        pdb_block = mol_to_pdb_block(mol)
-        viewer = py3Dmol.view(width=200, height=200)
-        viewer.addModel(pdb_block, "pdb")
-        viewer.setStyle({'stick': {}})
-        viewer.zoomTo()
-        viewer_html = viewer._make_html()
-        components.html(viewer_html, height=200)
+    col1, col2= st.columns((1,1))
+    with col1:
+        st.write("Extracting Embeddings...")
+        all_smiles = df4["SMILES"].tolist()
+        embeddings = [pipeline(smiles)[0] for smiles in all_smiles]
+        # print(embeddings)
+        embeddings = np.array([np.mean(embed, axis=0) for embed in embeddings])  # Using mean pooling
         
-        
-    st.write("Calculating Tanimoto coefficients...")
-    tanimoto_coeffs = []
-    for idx, smiles in enumerate(df4["SMILES"].tolist()):
-        if smiles != selected_smiles:
-            tanimoto_coeff = calculate_tanimoto_coefficient(selected_smiles, smiles)
-            tanimoto_coeffs.append((idx, tanimoto_coeff))
-    
-    # Sort by Tanimoto coefficient
-    tanimoto_coeffs.sort(key=lambda x: x[1], reverse=True)
-    top_tanimoto_indices = [idx for idx, _ in tanimoto_coeffs[:5]]
+        # Extract embedding for the selected SMILES
+        # print(pipeline(selected_smiles))
 
-    st.write("Top 5 most similar molecules based on Tanimoto Coefficient:")
-    for idx in top_tanimoto_indices:
-        st.write(f"Generic Name: {df4.iloc[idx]['generic_name']}, Tanimoto Coefficient: {tanimoto_coeffs[idx][1]}")
-        s=df4.iloc[idx]["SMILES"]
-        mol = generate_3d_coordinates(s)
-        pdb_block = mol_to_pdb_block(mol)
-        viewer = py3Dmol.view(width=200, height=200)
-        viewer.addModel(pdb_block, "pdb")
-        viewer.setStyle({'stick': {}})
-        viewer.zoomTo()
-        viewer_html = viewer._make_html()
-        components.html(viewer_html, height=200)
+        
+        selected_embedding = pipeline(selected_smiles)[0]
+        # print("***********************************************************************")
+        # print(selected_embedding)
+        selected_embedding = np.mean(selected_embedding, axis=0).reshape(1, -1)
+        print(selected_embedding.shape)
+        print(embeddings.shape)
+        # Compute cosine similarity
+        similarities = cosine_similarity(selected_embedding, embeddings).flatten()
+        print(similarities.shape)
+        top_indices = similarities.argsort()[-6:][::-1]  
+        top_indices = top_indices[1:]  
+        st.write(selected_embedding)
+        st.write("Top 5 most similar molecules:")
+        for idx in top_indices:
+            st.write(f"Generic Name: {df4.iloc[idx]['generic_name']}, Similarity: {similarities[idx]}")
+            s=df4.iloc[idx]["SMILES"]
+            mol = generate_3d_coordinates(s)
+            pdb_block = mol_to_pdb_block(mol)
+            viewer = py3Dmol.view(width=200, height=200)
+            viewer.addModel(pdb_block, "pdb")
+            viewer.setStyle({'stick': {}})
+            viewer.zoomTo()
+            viewer_html = viewer._make_html()
+            components.html(viewer_html, height=200)
+            
+    with col2:  
+        st.write("Calculating Tanimoto coefficients...")
+        tanimoto_coeffs = []
+        for idx, smiles in enumerate(df4["SMILES"].tolist()):
+            if smiles != selected_smiles:
+                tanimoto_coeff = calculate_tanimoto_coefficient(selected_smiles, smiles)
+                tanimoto_coeffs.append((idx, tanimoto_coeff))
+        
+        # Sort by Tanimoto coefficient
+        tanimoto_coeffs.sort(key=lambda x: x[1], reverse=True)
+        top_tanimoto_indices = [idx for idx, _ in tanimoto_coeffs[:5]]
+
+        st.write("Top 5 most similar molecules based on Tanimoto Coefficient:")
+        for idx in top_tanimoto_indices:
+            st.write(f"Generic Name: {df4.iloc[idx]['generic_name']}, Tanimoto Coefficient: {tanimoto_coeffs[idx][1]}")
+            s=df4.iloc[idx]["SMILES"]
+            mol = generate_3d_coordinates(s)
+            pdb_block = mol_to_pdb_block(mol)
+            viewer = py3Dmol.view(width=200, height=200)
+            viewer.addModel(pdb_block, "pdb")
+            viewer.setStyle({'stick': {}})
+            viewer.zoomTo()
+            viewer_html = viewer._make_html()
+            components.html(viewer_html, height=200)
  
 # abacavir_smiles = df4[df4["generic_name"] == "Abacavir"]["SMILES"].iloc[0]
 # ruxolitinib_smiles = df4[df4["generic_name"] == "Ruxolitinib"]["SMILES"].iloc[0]
