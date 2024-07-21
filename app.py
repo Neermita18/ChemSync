@@ -12,13 +12,10 @@ from rdkit.Chem import *
 import rdkit
 from rdkit.Chem import AllChem, Draw
 import py3Dmol
-import torch
-from transformers import AutoTokenizer, AutoModelForMaskedLM, AdamW, pipeline
-from torch.utils.data import Dataset, DataLoader
+from transformers import AutoTokenizer, AutoModelForMaskedLM, pipeline
 from sklearn.metrics.pairwise import cosine_similarity
 import requests
-from io import StringIO
-import tensorflow as tf    
+from io import StringIO 
 from rdkit.Chem import AllChem
 from rdkit import DataStructs
 
