@@ -1,4 +1,4 @@
-# ChemSync: An analyser and viewer of FDA-verified drugs
+# ChemSync: An analyser for FDA-verified drugs
 ## :star: Table of contents
 * [General info](#general-info)
 * [Project Glimpse](#glimpse)
