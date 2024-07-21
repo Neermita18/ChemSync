@@ -244,3 +244,5 @@ if st.session_state.get('show_tanimoto', False):
             viewer.zoomTo()
             viewer_html = viewer._make_html()
             st.components.v1.html(viewer_html, height=200)   
+
+
