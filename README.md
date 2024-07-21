@@ -6,7 +6,11 @@
 * [Setup](#setup)
 
 ## General info
-This project is a simple and dynamic application to view chemical compounds based on selected thresholds. Lipinski's rule helps drugs be classified as 'orally active.' 
+This project is a simple and dynamic application to view chemical compounds based on selected thresholds. Lipinski's rule of 5 or Pfizer's rule helps drugs be classified as 'orally active.' It helps in distinguishing between drug like and non drug like molecules. It predicts high probability of success or failure due to drug likeness for molecules complying with 2 or more of the following rules
+-[x]Molecular mass less than 500 Dalton
+-[x]High lipophilicity (expressed as LogP less than 5)
+-[x]Less than 5 hydrogen bond donors
+-[x]Less than 10 hydrogen bond acceptors
 
 ## Project Glimpse
 
@@ -21,7 +25,7 @@ Project is created with:
 * All requirements are available in requirements.txt
 	
 ## Setup
-To run this project, download the executable file from Releases or run the application on the web:
+To run this project, download the executable file from Releases or run the application on the web: https://neermita-drugs-analysis.streamlit.app/	
 
 
 
