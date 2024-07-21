@@ -4,6 +4,7 @@ import numpy as np
 import streamlit.components.v1 as components
 from rdkit import Chem
 from rdkit.Chem import MolFromSmiles
+from rdkit.Chem.Draw import rdMolDraw2D    
 from rdkit.Chem.Descriptors import ExactMolWt
 from rdkit.Chem.Lipinski import  NumHDonors, NumHAcceptors
 from rdkit.Chem.Crippen import MolLogP
@@ -15,7 +16,7 @@ import py3Dmol
 from transformers import AutoTokenizer, AutoModelForMaskedLM, pipeline
 from sklearn.metrics.pairwise import cosine_similarity
 import requests
-from io import StringIO 
+from io import StringIO  
 from rdkit.Chem import AllChem
 from rdkit import DataStructs
 
