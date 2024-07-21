@@ -12,7 +12,7 @@ This project is a simple and dynamic application to view chemical compounds base
 - [x] Less than 5 hydrogen bond donors
 - [x] Less than 10 hydrogen bond acceptors
 
-## Functionalities
+## :rocket: Functionalities
 - [x] View similar compounds in 2D, their SMILE representations and their molecular weights based on the selected thresholds using the slider.
 - [x] Select a single compound and view its structure in 3D.
 - [x] View the top 5 most similar compounds based on cosine similarity of embedded SMILE strings in 3D.
@@ -23,14 +23,14 @@ This project is a simple and dynamic application to view chemical compounds base
 [streamlit-app-2024-07-21-18-07-40.webm](https://github.com/user-attachments/assets/9eac3534-80e7-40db-b4e6-5ae09643513b)
 
 	
-## Technologies
+## :page_with_curl: Technologies
 Project is created with:
 * numpy version: 1.26.4
 * streamlit version: 1.36.0
 * rdkit version: 2024.3.1
 * All requirements are available in requirements.txt
 	
-## Setup
+## :gear:Setup
 To run this project, download the executable file from Releases or run the application on the web: https://neermita-drugs-analysis.streamlit.app/	
 
 
