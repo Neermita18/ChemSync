@@ -5,7 +5,7 @@
 * [Setup](#setup)
 
 ## General info
-This project is a simple and dynamic application to view chemical compounds based on selected thresholds.
+This project is a simple and dynamic application to view chemical compounds based on selected thresholds. Lipinski's rule helps drugs be classified as 'orally active.' 
 	
 ## Technologies
 Project is created with:
@@ -15,9 +15,5 @@ Project is created with:
 * All requirements are available in requirements.txt
 	
 ## Setup
-To run this project, install it locally using pip:
+To run this project, download the executable file from Releases or run the application on the web:
 
-```
-$ cd ../lorem
-$ npm install
-$ npm start
