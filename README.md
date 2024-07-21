@@ -30,7 +30,7 @@ Project is created with:
 * rdkit version: 2024.3.1
 * All requirements are available in requirements.txt
 	
-## :gear:Setup
+## :gear: Setup
 To run this project, download the executable file from Releases or run the application on the web: https://neermita-drugs-analysis.streamlit.app/	
 
 
