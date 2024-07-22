@@ -32,7 +32,7 @@ Project is created with:
 * All requirements are available in requirements.txt
 	
 ## :gear: Setup
-To run this project, download the executable file from Releases or run the application on the web: https://neermita-drugs-analysis.streamlit.app/	
+To run this project, download the executable file from Releases or run the application on the web: https://neermita-chemsync.streamlit.app/	
 
 
 
