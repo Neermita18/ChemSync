@@ -1,7 +1,8 @@
 # ChemSync: An analyser for FDA-verified drugs
 ## :star: Table of contents
 * [General info](#general-info)
-* [Project Glimpse](#glimpse)
+* [Functionalities](#functionalities)
+* [Project Glimpse](#projectglimpse)
 * [Technologies](#technologies)
 * [Setup](#setup)
 
